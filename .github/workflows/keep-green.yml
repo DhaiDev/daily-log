@@ -1,0 +1,26 @@
+name: Keep contribution green
+
+on:
+  schedule:
+    - cron: '0 2 * * *'      # daily UTC 02:00 = MYT 10:00
+    - cron: '0 14 * * *'     # daily UTC 14:00 = MYT 22:00 (backup in case GH skips first run)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make a daily commit
+        run: |
+          git config user.name  "DhaiDev"
+          git config user.email "ndscdjsn010131@gmail.com"
+          date -u +"%Y-%m-%d %H:%M:%S UTC" >> heartbeat.log
+          git add heartbeat.log
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: keep alive $(date -u +%Y-%m-%d-%H%M)"
+          git push
